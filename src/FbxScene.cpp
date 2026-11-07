@@ -515,7 +515,9 @@ bool Mesh::GenerateTangentsData(int uvSet, bool overwrite)
 	std::map<Key, Acc> groups;
 	std::vector<Key> cornerKey((size_t)corners);
 	static const int handMode = getenv("FBX2VMDF_TANGENT_HAND") ? atoi(getenv("FBX2VMDF_TANGENT_HAND")) : 3;
-	static const int normalKeyMode = getenv("FBX2VMDF_TANGENT_NKEY") ? atoi(getenv("FBX2VMDF_TANGENT_NKEY")) : 1;
+	static const int normalKeyMode = getenv("FBX2VMDF_TANGENT_NKEY") ? atoi(getenv("FBX2VMDF_TANGENT_NKEY")) : 3;
+	static const double normalTolerance = getenv("FBX2VMDF_TANGENT_NTOL") ? atof(getenv("FBX2VMDF_TANGENT_NTOL")) : 1e-6;
+	std::map<std::array<int64_t, 3>, std::vector<std::array<double, 3>>> clusters;
 	std::vector<std::array<double, 3>> cornerNormal((size_t)corners);
 	std::vector<int> cornerHandOf((size_t)corners, 1);
 
@@ -599,6 +601,23 @@ bool Mesh::GenerateTangentsData(int uvSet, bool overwrite)
 				if (nrm.reference == eIndexToDirect)
 					ni = (ni >= 0 && (size_t)ni < nrm.index.size()) ? nrm.index[(size_t)ni] : -1;
 				nb[0] = ni;
+			}
+			else if (normalKeyMode == 3)
+			{
+				// normals equal within a tolerance: join the first cluster of
+				// this control point / UV / handedness whose normal is close
+				std::array<int64_t, 3> base = { cps[k], uvKey(cps[k], corner), handMode == 0 ? 0 : faceHand };
+				std::vector<std::array<double, 3>>& reps = clusters[base];
+				size_t ci = 0;
+				for (; ci < reps.size(); ci++)
+				{
+					if (std::fabs(reps[ci][0] - N[k][0]) <= normalTolerance && std::fabs(reps[ci][1] - N[k][1]) <= normalTolerance &&
+					    std::fabs(reps[ci][2] - N[k][2]) <= normalTolerance)
+						break;
+				}
+				if (ci == reps.size())
+					reps.push_back({ N[k][0], N[k][1], N[k][2] });
+				nb[0] = (int64_t)ci;
 			}
 			Key key = { cps[k], uvKey(cps[k], corner), handMode == 0 ? 0 : faceHand, nb[0], nb[1], nb[2] };
 			Acc& a = groups[key];
