@@ -565,16 +565,10 @@ bool Mesh::GenerateTangentsData(int uvSet, bool overwrite)
 				sd[c] = (q1[c] * t2 - q2[c] * t1) * r;
 				td[c] = (q2[c] * s1 - q1[c] * s2) * r;
 			}
-			if (det == 0.0)
-			{
-				// No UV area: the SDK makes up a frame by a rule we don't know.
-				// Use the first edge so the tangent is at least unit length.
-				for (int c = 0; c < 3; c++)
-				{
-					sd[c] = q1[c];
-					td[c] = q2[c];
-				}
-			}
+			// No UV area (det == 0): the gradient is zero, so the triangle adds
+			// nothing to its corners (the SDK agrees when all three UVs are
+			// equal, but makes up a frame by an unknown rule when they lie on a
+			// line).
 			const double* nn = N[k];
 			double dp = nn[0] * sd[0] + nn[1] * sd[1] + nn[2] * sd[2];
 			double* o = O[k];
