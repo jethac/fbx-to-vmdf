@@ -83,7 +83,7 @@ You need CMake 3.14+ and a C++17 compiler. Everything else is vendored in
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release        # add -G Ninja if you like
 cmake --build build -j
-ctest --test-dir build                                 # self-test
+(cd build && ctest)                                   # self-test
 ```
 
 ### Windows (MSVC, Visual Studio 2019 or 2022)
@@ -93,7 +93,7 @@ From a "x64 Native Tools Command Prompt for VS":
 ```bat
 cmake -S . -B build -G "Visual Studio 17 2022" -A x64
 cmake --build build --config Release
-ctest --test-dir build -C Release
+cd build && ctest -C Release
 ```
 
 The binary is `build\Release\fbx-to-vmdf.exe`. Only 64-bit targets are
@@ -104,7 +104,7 @@ supported. `/fp:precise` is set; never build with `/fp:fast`.
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-ctest --test-dir build
+(cd build && ctest)
 ```
 
 This builds for the host architecture, arm64 or x86_64. The build passes

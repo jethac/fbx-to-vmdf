@@ -21,7 +21,7 @@ CONFIG=${CONFIG:-Release}
 # shellcheck disable=SC2086
 cmake -S "$HERE" -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE="$CONFIG" ${CMAKE_ARGS:-}
 cmake --build "$BUILD_DIR" --config "$CONFIG" -j 4
-ctest --test-dir "$BUILD_DIR" -C "$CONFIG" --output-on-failure
+( cd "$BUILD_DIR" && ctest -C "$CONFIG" --output-on-failure )
 
 EXE=$BUILD_DIR/fbx-to-vmdf
 [ -x "$EXE" ] || EXE=$BUILD_DIR/$CONFIG/fbx-to-vmdf.exe
