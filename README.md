@@ -173,6 +173,24 @@ the reasons below. The compare mode tells them apart.
    - components that cancel to about 1e-17, where the last bits depend on
      the SDK's exact operation order.
 
+### Results on UsagiGP's 80 models
+
+Against Ayataka 572419bb on Linux (FBX SDK 2020.3.9, the same sources and
+effect definitions):
+
+| Verdict | Models | Notes |
+| --- | --- | --- |
+| every defined byte identical | 41 | only never-initialised bytes differ |
+| same triangles in a different order | 22 | the quad models: triangulation order |
+| different | 17 | 10 differ by float noise only (largest change 8e-7); 5 differ in tangents around zero-UV-area triangles (BubbleCar, Police, dart, desk_fan, sprue); 2 are quad models where a near-square quad was split along the other diagonal (bench_top, chalk_arrow) |
+
+- All 80 skeleton XMLs and `.d` files are byte-identical.
+- Against the Windows reference cook (run with `--ayataka-compat=bounds`
+  and the effect file of that cook), the results are the same, except
+  `wood_block`, which shows the UV-index fix.
+- Converting all 80 models one process at a time takes 3.4 s, against
+  8.0 s for the Linux Ayataka (a loaded 12-core box).
+
 ## Not supported (yet)
 
 None of these are used by any current UsagiGP model:
